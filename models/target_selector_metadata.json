@@ -1,0 +1,8 @@
+{
+  "task_name": "target",
+  "threshold": 0.5,
+  "feature_format": "sentence + candidate_name + local_context",
+  "sklearn_version": "1.8.0",
+  "pandas_version": "3.0.1",
+  "joblib_version": "1.5.3"
+}

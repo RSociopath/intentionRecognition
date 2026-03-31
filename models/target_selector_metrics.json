@@ -1,0 +1,34 @@
+{
+  "task_name": "target",
+  "samples": 345,
+  "positive_samples": 140,
+  "negative_samples": 205,
+  "validation_accuracy": 0.8695652173913043,
+  "classification_report": {
+    "0": {
+      "precision": 0.9444444444444444,
+      "recall": 0.8292682926829268,
+      "f1-score": 0.8831168831168831,
+      "support": 41.0
+    },
+    "1": {
+      "precision": 0.7878787878787878,
+      "recall": 0.9285714285714286,
+      "f1-score": 0.8524590163934426,
+      "support": 28.0
+    },
+    "accuracy": 0.8695652173913043,
+    "macro avg": {
+      "precision": 0.8661616161616161,
+      "recall": 0.8789198606271778,
+      "f1-score": 0.8677879497551628,
+      "support": 69.0
+    },
+    "weighted avg": {
+      "precision": 0.8809105548235983,
+      "recall": 0.8695652173913043,
+      "f1-score": 0.8706760096638928,
+      "support": 69.0
+    }
+  }
+}

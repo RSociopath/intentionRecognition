@@ -1,0 +1,58 @@
+{
+  "task_name": "intent",
+  "model": "linear_svc",
+  "samples": 257,
+  "labels": [
+    "举手表决",
+    "回答",
+    "提问",
+    "继续",
+    "讨论"
+  ],
+  "validation_accuracy": 0.9423076923076923,
+  "classification_report": {
+    "举手表决": {
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1-score": 0.8571428571428571,
+      "support": 4.0
+    },
+    "回答": {
+      "precision": 0.9285714285714286,
+      "recall": 1.0,
+      "f1-score": 0.9629629629629629,
+      "support": 26.0
+    },
+    "提问": {
+      "precision": 0.9,
+      "recall": 1.0,
+      "f1-score": 0.9473684210526315,
+      "support": 9.0
+    },
+    "继续": {
+      "precision": 1.0,
+      "recall": 0.7142857142857143,
+      "f1-score": 0.8333333333333334,
+      "support": 7.0
+    },
+    "讨论": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "accuracy": 0.9423076923076923,
+    "macro avg": {
+      "precision": 0.9657142857142859,
+      "recall": 0.8928571428571429,
+      "f1-score": 0.9201615148983571,
+      "support": 52.0
+    },
+    "weighted avg": {
+      "precision": 0.9469780219780219,
+      "recall": 0.9423076923076923,
+      "f1-score": 0.9389472613156824,
+      "support": 52.0
+    }
+  }
+}

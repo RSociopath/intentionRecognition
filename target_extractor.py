@@ -76,8 +76,14 @@ def build_target_feature(text: str, candidate_name: str) -> str:
 
 
 def _extract_discussion_targets(text: str, candidate_names: list[str]) -> list[str]:
-    if not any(word in text for word in DISCUSSION_HINT_WORDS):
+    discussion_positions = [text.find(word) for word in DISCUSSION_HINT_WORDS if word in text]
+    if not discussion_positions:
         return []
+
+    discussion_index = min(discussion_positions)
+    before_discussion = [name for name in candidate_names if text.find(name) != -1 and text.find(name) < discussion_index]
+    if len(before_discussion) >= 2:
+        return before_discussion[:MAX_TARGETS]
 
     selected: list[str] = []
     for candidate in candidate_names:
@@ -113,7 +119,7 @@ def _extract_direct_addressee(text: str, candidate_names: list[str]) -> list[str
             continue
         suffix = text[index + len(candidate_name): index + len(candidate_name) + 8]
         normalized_suffix = suffix.replace(" ", "")
-        if normalized_suffix.startswith(("你", "，你", ",你", "同学你", "同学，你", "同学,你")):
+        if normalized_suffix.startswith(("你", "，你", ",你", "同学你", "同学，你", "同学,你", "你们", "，你们", ",你们")):
             return [candidate_name]
     return []
 
@@ -127,7 +133,7 @@ def _extract_leading_evaluation_speaker(text: str, candidate_names: list[str]) -
         return []
 
     suffix = text[len(first_name): len(first_name) + 2]
-    if not any(mark in suffix for mark in ("，", ",", "、")):
+    if not any(mark in suffix for mark in ("，", ",", "。")):
         return []
 
     if any(word in text for word in EVALUATION_HINT_WORDS):

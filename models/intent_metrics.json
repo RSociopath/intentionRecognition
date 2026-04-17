@@ -1,16 +1,23 @@
 {
   "task_name": "intent",
   "model": "linear_svc",
-  "samples": 257,
+  "samples": 284,
   "labels": [
+    "下课",
     "举手表决",
     "回答",
     "提问",
     "继续",
     "讨论"
   ],
-  "validation_accuracy": 0.9423076923076923,
+  "validation_accuracy": 0.9473684210526315,
   "classification_report": {
+    "下课": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 2.0
+    },
     "举手表决": {
       "precision": 1.0,
       "recall": 0.75,
@@ -24,16 +31,16 @@
       "support": 26.0
     },
     "提问": {
-      "precision": 0.9,
-      "recall": 1.0,
+      "precision": 1.0,
+      "recall": 0.9,
       "f1-score": 0.9473684210526315,
-      "support": 9.0
+      "support": 10.0
     },
     "继续": {
-      "precision": 1.0,
-      "recall": 0.7142857142857143,
-      "f1-score": 0.8333333333333334,
-      "support": 7.0
+      "precision": 0.8888888888888888,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8888888888888888,
+      "support": 9.0
     },
     "讨论": {
       "precision": 1.0,
@@ -41,18 +48,18 @@
       "f1-score": 1.0,
       "support": 6.0
     },
-    "accuracy": 0.9423076923076923,
+    "accuracy": 0.9473684210526315,
     "macro avg": {
-      "precision": 0.9657142857142859,
-      "recall": 0.8928571428571429,
-      "f1-score": 0.9201615148983571,
-      "support": 52.0
+      "precision": 0.9695767195767196,
+      "recall": 0.9231481481481482,
+      "f1-score": 0.9427271883412235,
+      "support": 57.0
     },
     "weighted avg": {
-      "precision": 0.9469780219780219,
-      "recall": 0.9423076923076923,
-      "f1-score": 0.9389472613156824,
-      "support": 52.0
+      "precision": 0.9498746867167919,
+      "recall": 0.9473684210526315,
+      "f1-score": 0.9463033802830663,
+      "support": 57.0
     }
   }
 }

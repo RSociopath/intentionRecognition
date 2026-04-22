@@ -279,6 +279,18 @@ class ActionTargetPipeline:
             else:
                 targets = targets[:1]
 
+        # Normalize question/answer output:
+        # - question must not carry targets
+        # - answer must carry a target
+        # - if a target is present under question, convert to answer
+        if action == "\u63d0\u95ee" and targets:
+            action = "\u56de\u7b54"
+            targets = targets[:1]
+        elif action == "\u63d0\u95ee":
+            targets = []
+        elif action == "\u56de\u7b54" and not targets:
+            action = "\u63d0\u95ee"
+
         return {
             "action": action,
             "target": targets,

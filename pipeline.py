@@ -9,116 +9,127 @@ from target_extractor import TargetExtractor
 
 
 QUESTION_HINT_WORDS = (
-    "提问",
-    "问题",
-    "疑问",
-    "举手",
-    "多少",
-    "几",
-    "吗",
-    "呢",
-    "为什么",
-    "怎么",
-    "怎样",
-    "是否",
-    "明白了吗",
-    "听懂了吗",
-    "理解了吗",
-    "？",
+    "\u63d0\u95ee",
+    "\u95ee\u9898",
+    "\u7591\u95ee",
+    "\u4e3e\u624b",
+    "\u591a\u5c11",
+    "\u51e0",
+    "\u5417",
+    "\u5462",
+    "\u4e3a\u4ec0\u4e48",
+    "\u600e\u4e48",
+    "\u600e\u6837",
+    "\u662f\u5426",
+    "\u660e\u767d\u4e86\u5417",
+    "\u542c\u61c2\u4e86\u5417",
+    "\u7406\u89e3\u4e86\u5417",
+    "\uff1f",
     "?",
 )
-ANSWER_HINT_WORDS = ("回答", "说说", "解释", "讲讲", "补充", "作答", "解答", "说明")
-DISCUSSION_HINT_WORDS = ("讨论", "交流", "商量")
-VOTE_HINT_WORDS = ("表决", "投票", "赞成", "反对")
+ANSWER_HINT_WORDS = ("\u56de\u7b54", "\u8bf4\u8bf4", "\u89e3\u91ca", "\u8bb2\u8bb2", "\u8865\u5145", "\u4f5c\u7b54", "\u89e3\u7b54", "\u8bf4\u660e")
+DISCUSSION_HINT_WORDS = ("\u8ba8\u8bba", "\u4ea4\u6d41", "\u5546\u91cf")
+VOTE_HINT_WORDS = ("\u8868\u51b3", "\u6295\u7968", "\u8d5e\u6210", "\u53cd\u5bf9")
 END_CLASS_HINT_WORDS = (
-    "下课",
-    "这节课到这里",
-    "今天这节课先上到这里",
-    "今天就讲到这里，下课",
-    "可以下课了",
-    "同学们下课",
-    "这节课结束",
-    "准备下课",
+    "\u4e0b\u8bfe",
+    "\u8fd9\u8282\u8bfe\u5230\u8fd9\u91cc",
+    "\u4eca\u5929\u8fd9\u8282\u8bfe\u5148\u4e0a\u5230\u8fd9\u91cc",
+    "\u4eca\u5929\u5c31\u8bb2\u5230\u8fd9\u91cc\uff0c\u4e0b\u8bfe",
+    "\u53ef\u4ee5\u4e0b\u8bfe\u4e86",
+    "\u540c\u5b66\u4eec\u4e0b\u8bfe",
+    "\u8fd9\u8282\u8bfe\u7ed3\u675f",
+    "\u51c6\u5907\u4e0b\u8bfe",
 )
 END_CLASS_FALSE_POSITIVE_PATTERNS = (
-    "下课本",
-    "看下课本",
-    "翻下课本",
-    "上课",
-    "开始上课",
+    "\u4e0b\u8bfe\u672c",
+    "\u770b\u4e0b\u8bfe\u672c",
+    "\u7ffb\u4e0b\u8bfe\u672c",
+    "\u4e0a\u8bfe",
+    "\u5f00\u59cb\u4e0a\u8bfe",
 )
 START_CLASS_HINT_WORDS = (
-    "上课",
-    "开始上课",
-    "准备上课",
-    "同学们好，上课",
+    "\u4e0a\u8bfe",
+    "\u5f00\u59cb\u4e0a\u8bfe",
+    "\u51c6\u5907\u4e0a\u8bfe",
+    "\u540c\u5b66\u4eec\u597d\uff0c\u4e0a\u8bfe",
 )
 SECOND_PERSON_QUESTION_PATTERNS = (
-    "你会",
-    "你能",
-    "你可以",
-    "你知道",
-    "你懂",
-    "你明白",
-    "你理解",
-    "你记得",
-    "你觉得",
+    "\u4f60\u4f1a",
+    "\u4f60\u80fd",
+    "\u4f60\u53ef\u4ee5",
+    "\u4f60\u77e5\u9053",
+    "\u4f60\u61c2",
+    "\u4f60\u660e\u767d",
+    "\u4f60\u7406\u89e3",
+    "\u4f60\u8bb0\u5f97",
+    "\u4f60\u89c9\u5f97",
+    "\u8bf7\u4f60",
+    "\u5e2e\u6211",
 )
-VOLUNTEER_QUESTION_HINT_WORDS = ("谁能", "谁来", "谁可以", "谁愿意", "哪位同学", "哪个同学", "有没有人")
+VOLUNTEER_QUESTION_HINT_WORDS = ("\u8c01\u80fd", "\u8c01\u6765", "\u8c01\u53ef\u4ee5", "\u8c01\u613f\u610f", "\u54ea\u4f4d\u540c\u5b66", "\u54ea\u4e2a\u540c\u5b66", "\u6709\u6ca1\u6709\u4eba")
+REQUEST_QUESTION_PATTERNS = (
+    "\u8bf7\u4f60",
+    "\u5e2e\u6211",
+    "\u9ebb\u70e6\u4f60",
+    "\u7b97\u4e00\u4e0b",
+    "\u7b97\u4e00\u7b97",
+    "\u8ba1\u7b97",
+    "\u6c42",
+)
 REFERENCE_OBJECT_SUFFIXES = (
-    "的问题",
-    "的疑问",
-    "的困惑",
-    "的问题点",
-    "的想法",
-    "的思路",
-    "的做法",
-    "的答案",
-    "的意思",
-    "同学的答案",
-    "说的",
-    "讲的",
-    "写的",
+    "\u7684\u95ee\u9898",
+    "\u7684\u7591\u95ee",
+    "\u7684\u56f0\u60d1",
+    "\u7684\u95ee\u9898\u70b9",
+    "\u7684\u60f3\u6cd5",
+    "\u7684\u601d\u8def",
+    "\u7684\u505a\u6cd5",
+    "\u7684\u7b54\u6848",
+    "\u7684\u610f\u601d",
+    "\u540c\u5b66\u7684\u7b54\u6848",
+    "\u8bf4\u7684",
+    "\u8bb2\u7684",
+    "\u5199\u7684",
 )
 FEEDBACK_CONTINUE_HINT_WORDS = (
-    "答对了",
-    "答错了",
-    "说得对",
-    "说得很好",
-    "回答得很好",
-    "回答得不错",
-    "做得好",
-    "做得不错",
-    "不错",
-    "很好",
+    "\u7b54\u5bf9\u4e86",
+    "\u7b54\u9519\u4e86",
+    "\u8bf4\u5f97\u5bf9",
+    "\u8bf4\u5f97\u5f88\u597d",
+    "\u56de\u7b54\u5f97\u5f88\u597d",
+    "\u56de\u7b54\u5f97\u4e0d\u9519",
+    "\u505a\u5f97\u597d",
+    "\u505a\u5f97\u4e0d\u9519",
+    "\u4e0d\u9519",
+    "\u5f88\u597d",
 )
 CONTINUE_HINT_WORDS = (
-    "公式是",
-    "即",
-    "等于",
-    "表示",
-    "我们已经知道",
-    "定义",
-    "概念",
-    "性质",
-    "我们发现",
-    "那么",
-    "就是",
-    "也就是",
-    "有关",
-    "相关",
-    "平方有关",
-    "区别在于",
-    "意味着",
-    "说明",
+    "\u516c\u5f0f\u662f",
+    "\u5373",
+    "\u7b49\u4e8e",
+    "\u8868\u793a",
+    "\u6211\u4eec\u5df2\u7ecf\u77e5\u9053",
+    "\u5b9a\u4e49",
+    "\u6982\u5ff5",
+    "\u6027\u8d28",
+    "\u6211\u4eec\u53d1\u73b0",
+    "\u90a3\u4e48",
+    "\u5c31\u662f",
+    "\u4e5f\u5c31\u662f",
+    "\u6709\u5173",
+    "\u76f8\u5173",
+    "\u5e73\u65b9\u6709\u5173",
+    "\u533a\u522b\u5728\u4e8e",
+    "\u610f\u5473\u7740",
+    "\u8bf4\u660e",
 )
 TEACHING_LEADIN_PREFIXES = (
-    "我们来",
-    "接下来我们",
-    "下面我们",
-    "现在我们",
-    "这一题我们",
-    "这道题我们",
+    "\u6211\u4eec\u6765",
+    "\u63a5\u4e0b\u6765\u6211\u4eec",
+    "\u4e0b\u9762\u6211\u4eec",
+    "\u73b0\u5728\u6211\u4eec",
+    "\u8fd9\u4e00\u9898\u6211\u4eec",
+    "\u8fd9\u9053\u9898\u6211\u4eec",
 )
 
 
@@ -143,7 +154,7 @@ class ActionTargetPipeline:
         normalized = text.strip()
         if not normalized.startswith(TEACHING_LEADIN_PREFIXES):
             return False
-        if "？" in normalized or "?" in normalized:
+        if "\uff1f" in normalized or "?" in normalized:
             return False
         return True
 
@@ -162,19 +173,22 @@ class ActionTargetPipeline:
         has_question_hint = any(word in normalized for word in QUESTION_HINT_WORDS)
         return has_question_hint and any(pattern in normalized for pattern in SECOND_PERSON_QUESTION_PATTERNS)
 
+    def _is_request_question(self, text: str) -> bool:
+        normalized = text.strip()
+        return any(pattern in normalized for pattern in REQUEST_QUESTION_PATTERNS)
+
     def _references_target_as_content(self, text: str, target: str) -> bool:
         patterns = [f"{target}{suffix}" for suffix in REFERENCE_OBJECT_SUFFIXES]
         patterns.extend(
             [
-                f"你明白{target}",
-                f"你听懂{target}",
-                f"你理解{target}",
-                f"{target}同学的",
-                f"{target}的意思是",
-                f"{target}的意思",
-                f"{target}意思是",
-                f"{target}说的是",
-                f"{target}讲的是",
+                f"\u4f60\u660e\u767d{target}",
+                f"\u4f60\u542c\u61c2{target}",
+                f"\u4f60\u7406\u89e3{target}",
+                f"{target}\u540c\u5b66\u7684",
+                f"{target}\u7684\u610f\u601d\u662f",
+                f"{target}\u610f\u601d\u662f",
+                f"{target}\u8bf4\u7684\u662f",
+                f"{target}\u8bb2\u7684\u662f",
             ]
         )
         return any(pattern in text for pattern in patterns)
@@ -191,15 +205,17 @@ class ActionTargetPipeline:
         is_teaching_leadin = self._is_teaching_leadin(text)
 
         if has_discussion_hint:
-            return "讨论"
+            return "\u8ba8\u8bba"
         if has_vote_hint:
-            return "举手表决"
+            return "\u4e3e\u624b\u8868\u51b3"
         if has_start_class_hint:
-            return "继续"
+            return "\u7ee7\u7eed"
         if has_end_class_hint:
-            return "下课"
-        if action == "提问" and ((not has_question_hint and has_continue_hint) or is_teaching_leadin):
-            return "继续"
+            return "\u4e0b\u8bfe"
+        if self._is_request_question(text):
+            return "\u63d0\u95ee"
+        if action == "\u63d0\u95ee" and ((not has_question_hint and has_continue_hint) or is_teaching_leadin):
+            return "\u7ee7\u7eed"
 
         if not hasattr(self.intent_model, "decision_function"):
             return action
@@ -221,9 +237,10 @@ class ActionTargetPipeline:
             or has_vote_hint
             or has_start_class_hint
             or has_end_class_hint
+            or self._is_request_question(text)
         )
         if margin < self.intent_margin_threshold and not has_clear_intent_hint:
-            return "继续"
+            return "\u7ee7\u7eed"
         return action
 
     def _is_volunteer_question(self, text: str) -> bool:
@@ -239,25 +256,25 @@ class ActionTargetPipeline:
         has_question_hint = any(word in text for word in QUESTION_HINT_WORDS)
 
         if self._is_feedback_statement(text):
-            action = "继续"
+            action = "\u7ee7\u7eed"
             targets = []
 
         if self._is_volunteer_question(text):
-            action = "提问"
+            action = "\u63d0\u95ee"
             targets = []
 
-        if action == "下课":
+        if action == "\u4e0b\u8bfe":
             targets = []
 
-        if action == "继续" and not targets and self._is_second_person_question(text):
-            action = "提问"
+        if action == "\u7ee7\u7eed" and not targets and (self._is_second_person_question(text) or self._is_request_question(text)):
+            action = "\u63d0\u95ee"
 
-        if action == "回答" and not targets:
-            action = "提问"
-        elif action == "回答":
+        if action == "\u56de\u7b54" and not targets:
+            action = "\u63d0\u95ee"
+        elif action == "\u56de\u7b54":
             first_target = targets[0]
             if self._references_target_as_content(text, first_target):
-                action = "提问" if has_question_hint else "继续"
+                action = "\u63d0\u95ee" if has_question_hint else "\u7ee7\u7eed"
                 targets = []
             else:
                 targets = targets[:1]

@@ -28,7 +28,7 @@ QUESTION_HINT_WORDS = (
     "?",
 )
 ANSWER_HINT_WORDS = ("\u56de\u7b54", "\u8bf4\u8bf4", "\u89e3\u91ca", "\u8bb2\u8bb2", "\u8865\u5145", "\u4f5c\u7b54", "\u89e3\u7b54", "\u8bf4\u660e")
-DISCUSSION_HINT_WORDS = ("\u8ba8\u8bba", "\u4ea4\u6d41", "\u5546\u91cf")
+DISCUSSION_HINT_WORDS = ("\u8ba8\u8bba", "\u63a2\u8ba8", "\u4ea4\u6d41", "\u5546\u91cf")
 VOTE_HINT_WORDS = ("\u8868\u51b3", "\u6295\u7968", "\u8d5e\u6210", "\u53cd\u5bf9")
 END_CLASS_HINT_WORDS = (
     "\u4e0b\u8bfe",
@@ -65,6 +65,45 @@ SECOND_PERSON_QUESTION_PATTERNS = (
     "\u4f60\u89c9\u5f97",
     "\u8bf7\u4f60",
     "\u5e2e\u6211",
+)
+ADDRESSED_ANSWER_PROMPT_PATTERNS = (
+    "\u4f60\u6765",
+    "\u4f60\u6765\u7b97",
+    "\u4f60\u6765\u7b97\u4e00\u4e0b",
+    "\u4f60\u6765\u7b97\u4e00\u7b97",
+    "\u4f60\u6765\u8ba1\u7b97",
+    "\u4f60\u505a",
+    "\u4f60\u7b54",
+    "\u4f60\u89e3\u91ca",
+    "\u4f60\u56de\u7b54",
+    "\u4f60\u4f5c\u7b54",
+    "\u4e0a\u6765\u505a",
+    "\u4e0a\u6765\u7b97",
+    "\u6765\u505a\u5427",
+    "\u6765\u7b97\u4e00\u4e0b",
+    "\u6765\u7b97\u4e00\u7b97",
+    "\u6765\u8ba1\u7b97",
+    "\u6765\u56de\u7b54",
+)
+ADDRESSED_QUESTION_PROMPT_PATTERNS = (
+    "\u4f60\u8bf4\u8bf4",
+    "\u4f60\u8bb2\u8bb2",
+    "\u6765\u8bf4\u8bf4",
+    "\u6765\u8bb2\u8bb2",
+    "\u6765\u8c08\u8c08",
+    "\u6765\u8bf4\u4e00\u8bf4",
+    "\u6765\u8bb2\u4e00\u8bb2",
+    "\u4e00\u8d77\u8bf4\u8bf4",
+    "\u4e00\u8d77\u8bb2\u8bb2",
+    "\u4e00\u8d77\u8bf4\u4e00\u8bf4",
+    "\u4e00\u8d77\u8bb2\u4e00\u8bb2",
+)
+PLURAL_ADDRESSED_ANSWER_HINT_WORDS = (
+    "\u4f60\u4eec",
+    "\u4f60\u4fe9",
+    "\u4e24\u4e2a",
+    "\u4e24\u4f4d",
+    "\u4e00\u8d77",
 )
 VOLUNTEER_QUESTION_HINT_WORDS = ("\u8c01\u80fd", "\u8c01\u6765", "\u8c01\u53ef\u4ee5", "\u8c01\u613f\u610f", "\u54ea\u4f4d\u540c\u5b66", "\u54ea\u4e2a\u540c\u5b66", "\u6709\u6ca1\u6709\u4eba")
 REQUEST_QUESTION_PATTERNS = (
@@ -177,6 +216,18 @@ class ActionTargetPipeline:
         normalized = text.strip()
         return any(pattern in normalized for pattern in REQUEST_QUESTION_PATTERNS)
 
+    def _is_addressed_answer_prompt(self, text: str) -> bool:
+        normalized = text.strip()
+        return any(pattern in normalized for pattern in ADDRESSED_ANSWER_PROMPT_PATTERNS)
+
+    def _is_addressed_question_prompt(self, text: str) -> bool:
+        normalized = text.strip()
+        return any(pattern in normalized for pattern in ADDRESSED_QUESTION_PROMPT_PATTERNS)
+
+    def _is_plural_addressed_answer_prompt(self, text: str) -> bool:
+        normalized = text.strip()
+        return any(word in normalized for word in PLURAL_ADDRESSED_ANSWER_HINT_WORDS)
+
     def _references_target_as_content(self, text: str, target: str) -> bool:
         patterns = [f"{target}{suffix}" for suffix in REFERENCE_OBJECT_SUFFIXES]
         patterns.extend(
@@ -247,6 +298,8 @@ class ActionTargetPipeline:
         return any(word in text for word in VOLUNTEER_QUESTION_HINT_WORDS)
 
     def _is_feedback_statement(self, text: str) -> bool:
+        if any(word in text for word in QUESTION_HINT_WORDS):
+            return False
         return any(word in text for word in FEEDBACK_CONTINUE_HINT_WORDS)
 
     def predict(self, text: str) -> dict[str, object]:
@@ -269,6 +322,17 @@ class ActionTargetPipeline:
         if action == "\u7ee7\u7eed" and not targets and (self._is_second_person_question(text) or self._is_request_question(text)):
             action = "\u63d0\u95ee"
 
+        if self._is_addressed_question_prompt(text):
+            if len(targets) >= 2 or self._is_plural_addressed_answer_prompt(text):
+                action = "\u8ba8\u8bba"
+                targets = targets[: self.target_extractor.max_targets]
+            else:
+                action = "\u63d0\u95ee"
+                targets = []
+
+        if targets and self._is_addressed_answer_prompt(text):
+            action = "\u56de\u7b54"
+
         if action == "\u56de\u7b54" and not targets:
             action = "\u63d0\u95ee"
         elif action == "\u56de\u7b54":
@@ -277,15 +341,35 @@ class ActionTargetPipeline:
                 action = "\u63d0\u95ee" if has_question_hint else "\u7ee7\u7eed"
                 targets = []
             else:
-                targets = targets[:1]
+                if self._is_plural_addressed_answer_prompt(text):
+                    targets = targets[: self.target_extractor.max_targets]
+                else:
+                    targets = targets[:1]
 
         # Normalize question/answer output:
-        # - question must not carry targets
+        # - question-like utterances are resolved within question/answer
+        # - question must not carry targets unless it directly calls on someone to answer
         # - answer must carry a target
-        # - if a target is present under question, convert to answer
-        if action == "\u63d0\u95ee" and targets:
-            action = "\u56de\u7b54"
-            targets = targets[:1]
+        # - mixed self-question/explanation utterances stay as question
+        if has_question_hint:
+            if targets and (
+                self._is_second_person_question(text)
+                or self._is_request_question(text)
+                or self._is_addressed_answer_prompt(text)
+            ):
+                first_target = targets[0]
+                if self._references_target_as_content(text, first_target):
+                    action = "\u63d0\u95ee"
+                    targets = []
+                else:
+                    action = "\u56de\u7b54"
+                    if self._is_plural_addressed_answer_prompt(text):
+                        targets = targets[: self.target_extractor.max_targets]
+                    else:
+                        targets = targets[:1]
+            else:
+                action = "\u63d0\u95ee"
+                targets = []
         elif action == "\u63d0\u95ee":
             targets = []
         elif action == "\u56de\u7b54" and not targets:

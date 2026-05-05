@@ -11,6 +11,9 @@ DISCUSSION_HINT_WORDS = ("讨论", "交流", "商量")
 HELP_HINT_WORDS = ("帮", "帮助", "协助")
 EVALUATION_HINT_WORDS = ("觉得", "认为", "评价", "怎么看", "对吗", "对不对", "是否正确", "答案", "回答")
 MAX_TARGETS = 3
+SINGULAR_ADDRESSEE_PREFIXES = ("你", "，你", ",你", "同学你", "同学，你", "同学,你")
+PLURAL_ADDRESSEE_PREFIXES = ("你们", "，你们", ",你们", "你俩", "，你俩", ",你俩")
+COORDINATION_SEGMENTS = {"", "，", ",", "、", "和", "及", "与", "跟", "，和", ",和", "，及", ",及", "，与", ",与"}
 
 
 @dataclass(frozen=True)
@@ -109,17 +112,43 @@ def _extract_help_actor(text: str, candidate_names: list[str]) -> list[str]:
     return candidate_names[:1]
 
 
+def _collect_coordinated_names(text: str, candidate_names: list[str], end_index: int) -> list[str]:
+    positions = [(name, text.find(name)) for name in candidate_names[: end_index + 1]]
+    positions = [(name, start) for name, start in positions if start != -1]
+    if not positions:
+        return []
+
+    collected = [positions[-1][0]]
+    current_start = positions[-1][1]
+
+    for name, start in reversed(positions[:-1]):
+        segment = text[start + len(name):current_start].replace(" ", "")
+        if segment in COORDINATION_SEGMENTS:
+            collected.append(name)
+            current_start = start
+            continue
+        break
+
+    collected.reverse()
+    return collected[:MAX_TARGETS]
+
+
 def _extract_direct_addressee(text: str, candidate_names: list[str]) -> list[str]:
     if not candidate_names:
         return []
 
-    for candidate_name in candidate_names:
-        index = text.find(candidate_name)
-        if index == -1:
+    for candidate_index, candidate_name in enumerate(candidate_names):
+        name_start = text.find(candidate_name)
+        if name_start == -1:
             continue
-        suffix = text[index + len(candidate_name): index + len(candidate_name) + 8]
+        suffix = text[name_start + len(candidate_name): name_start + len(candidate_name) + 8]
         normalized_suffix = suffix.replace(" ", "")
-        if normalized_suffix.startswith(("你", "，你", ",你", "同学你", "同学，你", "同学,你", "你们", "，你们", ",你们")):
+        if normalized_suffix.startswith(PLURAL_ADDRESSEE_PREFIXES):
+            coordinated_names = _collect_coordinated_names(text, candidate_names, candidate_index)
+            if coordinated_names:
+                return coordinated_names
+            return [candidate_name]
+        if normalized_suffix.startswith(SINGULAR_ADDRESSEE_PREFIXES):
             return [candidate_name]
     return []
 

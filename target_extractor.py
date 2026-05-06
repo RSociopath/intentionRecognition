@@ -14,6 +14,7 @@ MAX_TARGETS = 3
 SINGULAR_ADDRESSEE_PREFIXES = ("你", "，你", ",你", "同学你", "同学，你", "同学,你")
 PLURAL_ADDRESSEE_PREFIXES = ("你们", "，你们", ",你们", "你俩", "，你俩", ",你俩")
 COORDINATION_SEGMENTS = {"", "，", ",", "、", "和", "及", "与", "跟", "，和", ",和", "，及", ",及", "，与", ",与"}
+ADDRESS_FILLER_WORDS = ("啊", "呀", "呢", "呃", "额", "哦", "诶", "欸")
 
 
 @dataclass(frozen=True)
@@ -143,6 +144,12 @@ def _extract_direct_addressee(text: str, candidate_names: list[str]) -> list[str
             continue
         suffix = text[name_start + len(candidate_name): name_start + len(candidate_name) + 8]
         normalized_suffix = suffix.replace(" ", "")
+        if normalized_suffix.startswith("同学"):
+            normalized_suffix = normalized_suffix[2:]
+            normalized_suffix = normalized_suffix.lstrip("，,。")
+            while normalized_suffix.startswith(ADDRESS_FILLER_WORDS):
+                normalized_suffix = normalized_suffix[1:]
+            normalized_suffix = normalized_suffix.lstrip("，,。")
         if normalized_suffix.startswith(PLURAL_ADDRESSEE_PREFIXES):
             coordinated_names = _collect_coordinated_names(text, candidate_names, candidate_index)
             if coordinated_names:

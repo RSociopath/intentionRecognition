@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import joblib
@@ -21,6 +22,10 @@ QUESTION_HINT_WORDS = (
     "\u600e\u4e48",
     "\u600e\u6837",
     "\u662f\u5426",
+    "\u5728\u54ea",
+    "\u54ea\u91cc",
+    "\u54ea\u4e2a",
+    "\u54ea\u4e24\u4e2a",
     "\u660e\u767d\u4e86\u5417",
     "\u542c\u61c2\u4e86\u5417",
     "\u7406\u89e3\u4e86\u5417",
@@ -63,8 +68,26 @@ SECOND_PERSON_QUESTION_PATTERNS = (
     "\u4f60\u7406\u89e3",
     "\u4f60\u8bb0\u5f97",
     "\u4f60\u89c9\u5f97",
+    "\u4f60\u544a\u8bc9\u6211",
     "\u8bf7\u4f60",
     "\u5e2e\u6211",
+)
+DISCOVERY_QUESTION_PATTERNS = (
+    "\u4f60\u80fd\u53d1\u73b0\u4ec0\u4e48",
+    "\u4f60\u80fd\u770b\u51fa\u4ec0\u4e48",
+    "\u4f60\u53d1\u73b0\u4ec0\u4e48",
+    "\u4f60\u770b\u51fa\u4ec0\u4e48",
+    "\u4ec0\u4e48\u89c4\u5f8b",
+)
+CONTENT_QUESTION_PATTERNS = (
+    "\u7b54\u6848\u662f\u4ec0\u4e48",
+    "\u7ed3\u679c\u662f\u4ec0\u4e48",
+)
+CONTENT_REVIEW_PATTERNS = (
+    "\u6211\u4eec\u5b66\u8fc7\u4e86\u4ec0\u4e48\u662f",
+    "\u4e4b\u524d\u5b66\u8fc7\u4e86\u4ec0\u4e48\u662f",
+    "\u5728\u4e4b\u524d\u7684\u8bfe\u7a0b",
+    "\u8fd9\u8282\u8bfe\u6211\u4eec\u8981\u5b66\u4e60",
 )
 ADDRESSED_ANSWER_PROMPT_PATTERNS = (
     "\u4f60\u6765",
@@ -110,10 +133,26 @@ REQUEST_QUESTION_PATTERNS = (
     "\u8bf7\u4f60",
     "\u5e2e\u6211",
     "\u9ebb\u70e6\u4f60",
+    "\u505a\u4e00\u4e0b",
+    "\u505a\u4e00\u505a",
+    "\u518d\u505a\u4e00\u4e0b",
+    "\u518d\u505a\u4e00\u505a",
     "\u7b97\u4e00\u4e0b",
     "\u7b97\u4e00\u7b97",
-    "\u8ba1\u7b97",
+    "\u8bf7\u8ba1\u7b97",
+    "\u6765\u8ba1\u7b97",
+)
+REQUEST_QUESTION_PREFIXES = (
     "\u6c42",
+    "\u6c42\u51fa",
+    "\u6c42\u89e3",
+    "\u6c42\u4e0b\u5217",
+    "\u6c42\u8bc1",
+)
+REQUEST_STATEMENT_PATTERNS = (
+    "\u6c42\u51fa",
+    "\u5c31\u89e3\u51b3\u8fd9\u9053\u9898\u4e86",
+    "\u5c31\u80fd\u89e3\u51b3",
 )
 REFERENCE_OBJECT_SUFFIXES = (
     "\u7684\u95ee\u9898",
@@ -141,6 +180,11 @@ FEEDBACK_CONTINUE_HINT_WORDS = (
     "\u505a\u5f97\u4e0d\u9519",
     "\u4e0d\u9519",
     "\u5f88\u597d",
+    "\u633a\u5feb",
+    "\u633a\u597d",
+    "\u633a\u4e0d\u9519",
+    "\u5c45\u7136\u53ef\u4ee5",
+    "\u8fd8\u53ef\u4ee5\u5440",
 )
 CONTINUE_HINT_WORDS = (
     "\u516c\u5f0f\u662f",
@@ -170,6 +214,36 @@ TEACHING_LEADIN_PREFIXES = (
     "\u8fd9\u4e00\u9898\u6211\u4eec",
     "\u8fd9\u9053\u9898\u6211\u4eec",
 )
+TEACHING_TOPIC_HINT_WORDS = (
+    "\u5e94\u7528\u573a\u666f",
+    "\u5e94\u7528",
+    "\u516c\u5f0f",
+    "\u6982\u5ff5",
+    "\u65b9\u6cd5",
+    "\u6b65\u9aa4",
+    "\u6027\u8d28",
+    "\u4f8b\u9898",
+    "\u7b49\u6bd4\u6570\u5217",
+    "\u7684\u7ed3\u679c",
+)
+TEACHING_OBJECTIVE_PREFIX_PATTERNS = (
+    "\u6211\u4eec\u8fd9\u8282\u8bfe\u7684\u4efb\u52a1\u5c31\u662f",
+    "\u8fd9\u8282\u8bfe\u7684\u4efb\u52a1\u5c31\u662f",
+    "\u4eca\u5929\u7684\u4efb\u52a1\u5c31\u662f",
+    "\u63a5\u4e0b\u6765\u6211\u4eec\u8981\u89e3\u51b3\u7684\u662f",
+    "\u6211\u4eec\u8981\u89e3\u51b3\u7684\u662f",
+)
+ADDRESSEE_FILLER_WORDS = ("\u554a", "\u5440", "\u5462", "\u5443", "\u989d", "\u54e6", "\u8bf6", "\u6b38")
+QUESTION_REFERENCE_PATTERNS = (
+    "\u4f60\u7684\u95ee\u9898",
+    "\u8fd9\u4e2a\u95ee\u9898",
+    "\u8fd9\u9053\u95ee\u9898",
+    "\u5e26\u7740\u4f60\u7684\u95ee\u9898",
+    "\u5e26\u7740\u8fd9\u4e2a\u95ee\u9898",
+    "\u95ee\u9898\u7ee7\u7eed",
+)
+WEAK_QUESTION_HINT_WORDS = ("\u5462",)
+SPOKEN_FILLER_WORDS = ("\u5443", "\u989d", "\u554a", "\u54e6", "\u5462")
 
 
 class ActionTargetPipeline:
@@ -197,6 +271,73 @@ class ActionTargetPipeline:
             return False
         return True
 
+    def _has_question_hint(self, text: str) -> bool:
+        normalized = text.strip()
+        matched_words = [word for word in QUESTION_HINT_WORDS if word in normalized]
+        if not matched_words:
+            return False
+        non_object_words = [
+            word for word in matched_words if word not in ("\u95ee\u9898", *WEAK_QUESTION_HINT_WORDS)
+        ]
+        if non_object_words:
+            return True
+        if any(word in matched_words for word in WEAK_QUESTION_HINT_WORDS):
+            return False
+        return not any(pattern in normalized for pattern in QUESTION_REFERENCE_PATTERNS)
+
+    def _is_teaching_topic_fragment(self, text: str) -> bool:
+        normalized = text.strip()
+        if not normalized:
+            return False
+        if "\uff1f" in normalized or "?" in normalized:
+            return False
+        if self._has_question_hint(normalized):
+            return False
+        if any(word in normalized for word in ANSWER_HINT_WORDS):
+            return False
+        if self._is_second_person_question(normalized) or self._is_request_question(normalized):
+            return False
+        return any(word in normalized for word in TEACHING_TOPIC_HINT_WORDS)
+
+    def _is_teaching_objective_statement(self, text: str) -> bool:
+        normalized = text.strip()
+        compact = normalized
+        for word in SPOKEN_FILLER_WORDS:
+            compact = compact.replace(word, "")
+        compact = compact.rstrip(" \t\r\n\uff0c,\u3002\uff1b;")
+        if not normalized:
+            return False
+        if "\uff1f" in normalized or "?" in normalized:
+            return False
+        if self._is_second_person_question(normalized) or self._is_request_question(normalized):
+            return False
+        if not any(pattern in compact for pattern in TEACHING_OBJECTIVE_PREFIX_PATTERNS):
+            return False
+        return any(word in compact for word in TEACHING_TOPIC_HINT_WORDS) or compact.endswith("\u600e\u4e48")
+
+    def _is_target_direct_addressee(self, text: str, target: str) -> bool:
+        index = text.find(target)
+        if index == -1:
+            return False
+        prefix = text[max(0, index - 6):index].replace(" ", "")
+        suffix = text[index + len(target): index + len(target) + 10]
+        normalized_suffix = suffix.replace(" ", "")
+        if (
+            index <= 6
+            or any(prefix.endswith(marker) for marker in ("请问", "那么", "那", "呃", "额", "好", "好的"))
+        ) and (
+            normalized_suffix.startswith(("同学", "，同学", ",同学"))
+            or normalized_suffix.startswith(("\u4f60", "\uff0c\u4f60", ",\u4f60"))
+        ):
+            return True
+        if normalized_suffix.startswith("\u540c\u5b66"):
+            normalized_suffix = normalized_suffix[2:]
+            normalized_suffix = normalized_suffix.lstrip("\uff0c,\u3002")
+            while normalized_suffix.startswith(ADDRESSEE_FILLER_WORDS):
+                normalized_suffix = normalized_suffix[1:]
+            normalized_suffix = normalized_suffix.lstrip("\uff0c,\u3002")
+        return normalized_suffix.startswith(("\u4f60", "\uff0c\u4f60", ",\u4f60", "\u4f60\u4eec", "\uff0c\u4f60\u4eec", ",\u4f60\u4eec"))
+
     def _is_start_class_statement(self, text: str) -> bool:
         normalized = text.strip()
         return any(word in normalized for word in START_CLASS_HINT_WORDS)
@@ -209,12 +350,33 @@ class ActionTargetPipeline:
 
     def _is_second_person_question(self, text: str) -> bool:
         normalized = text.strip()
-        has_question_hint = any(word in normalized for word in QUESTION_HINT_WORDS)
+        has_question_hint = self._has_question_hint(normalized)
         return has_question_hint and any(pattern in normalized for pattern in SECOND_PERSON_QUESTION_PATTERNS)
 
     def _is_request_question(self, text: str) -> bool:
         normalized = text.strip()
-        return any(pattern in normalized for pattern in REQUEST_QUESTION_PATTERNS)
+        if normalized.startswith("\u6c42\u51fa") and ("\u5c31" in normalized or "\u4e86" in normalized):
+            return False
+        if any(pattern in normalized for pattern in REQUEST_QUESTION_PATTERNS):
+            return True
+        if normalized.startswith(REQUEST_QUESTION_PREFIXES):
+            return True
+        clauses = [part.strip() for part in re.split(r"[，,。；;：:]", normalized) if part.strip()]
+        return any(
+            clause.startswith(REQUEST_QUESTION_PREFIXES)
+            and not (clause.startswith("\u6c42\u51fa") and ("\u5c31" in clause or "\u4e86" in clause))
+            for clause in clauses
+        )
+
+    def _is_discovery_question(self, text: str) -> bool:
+        normalized = text.strip()
+        return any(pattern in normalized for pattern in DISCOVERY_QUESTION_PATTERNS)
+
+    def _is_content_question(self, text: str) -> bool:
+        normalized = text.strip()
+        if any(pattern in normalized for pattern in CONTENT_REVIEW_PATTERNS):
+            return False
+        return any(pattern in normalized for pattern in CONTENT_QUESTION_PATTERNS)
 
     def _is_addressed_answer_prompt(self, text: str) -> bool:
         normalized = text.strip()
@@ -235,6 +397,9 @@ class ActionTargetPipeline:
                 f"\u4f60\u660e\u767d{target}",
                 f"\u4f60\u542c\u61c2{target}",
                 f"\u4f60\u7406\u89e3{target}",
+                f"\u5927\u5bb6\u89c9\u5f97{target}",
+                f"\u4f60\u89c9\u5f97{target}",
+                f"\u4f60\u8ba4\u4e3a{target}",
                 f"{target}\u540c\u5b66\u7684",
                 f"{target}\u7684\u610f\u601d\u662f",
                 f"{target}\u610f\u601d\u662f",
@@ -246,7 +411,7 @@ class ActionTargetPipeline:
 
     def _predict_action(self, text: str) -> str:
         action = self.intent_model.predict([text])[0]
-        has_question_hint = any(word in text for word in QUESTION_HINT_WORDS)
+        has_question_hint = self._has_question_hint(text)
         has_answer_hint = any(word in text for word in ANSWER_HINT_WORDS)
         has_discussion_hint = any(word in text for word in DISCUSSION_HINT_WORDS)
         has_vote_hint = any(word in text for word in VOTE_HINT_WORDS)
@@ -265,7 +430,12 @@ class ActionTargetPipeline:
             return "\u4e0b\u8bfe"
         if self._is_request_question(text):
             return "\u63d0\u95ee"
-        if action == "\u63d0\u95ee" and ((not has_question_hint and has_continue_hint) or is_teaching_leadin):
+        if action == "\u63d0\u95ee" and (
+            (not has_question_hint and has_continue_hint)
+            or is_teaching_leadin
+            or self._is_teaching_topic_fragment(text)
+            or self._is_teaching_objective_statement(text)
+        ):
             return "\u7ee7\u7eed"
 
         if not hasattr(self.intent_model, "decision_function"):
@@ -306,7 +476,7 @@ class ActionTargetPipeline:
         action = self._predict_action(text)
         target_result = self.target_extractor.predict(text)
         targets = target_result["targets"]
-        has_question_hint = any(word in text for word in QUESTION_HINT_WORDS)
+        has_question_hint = self._has_question_hint(text)
 
         if self._is_feedback_statement(text):
             action = "\u7ee7\u7eed"
@@ -319,7 +489,12 @@ class ActionTargetPipeline:
         if action == "\u4e0b\u8bfe":
             targets = []
 
-        if action == "\u7ee7\u7eed" and not targets and (self._is_second_person_question(text) or self._is_request_question(text)):
+        if action == "\u7ee7\u7eed" and not targets and (
+            self._is_second_person_question(text)
+            or self._is_request_question(text)
+            or self._is_discovery_question(text)
+            or self._is_content_question(text)
+        ):
             action = "\u63d0\u95ee"
 
         if self._is_addressed_question_prompt(text):
@@ -352,10 +527,14 @@ class ActionTargetPipeline:
         # - answer must carry a target
         # - mixed self-question/explanation utterances stay as question
         if has_question_hint:
-            if targets and (
+            if self._is_teaching_objective_statement(text):
+                action = "\u7ee7\u7eed"
+                targets = []
+            elif targets and (
                 self._is_second_person_question(text)
                 or self._is_request_question(text)
                 or self._is_addressed_answer_prompt(text)
+                or (action == "\u56de\u7b54" and self._is_target_direct_addressee(text, targets[0]))
             ):
                 first_target = targets[0]
                 if self._references_target_as_content(text, first_target):
